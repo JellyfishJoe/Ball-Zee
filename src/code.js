@@ -31,8 +31,15 @@ function drawAim(finX, finY, numBalls){
 	ctx.moveTo(x, y);
 	ctx.lineTo(finX, finY);
 	ctx.stroke();
-	ballX = canvas.width / 2 - finX	
-	drawBall(ballX, finY/2);
+	distX = (x - finX) / 2;
+	distY = (y - finY) / 2;
+	ballX = x + distX
+	ballY = y + 3 / 4;
+	//console.log(`finX: ${finX}, cx: ${cx}, ballX: ${ballX}`);
+	drawBall(distX, distY);
+	drawBall(ballX, 150);
+	//console.log(`ball: ${ballX}, mid: ${midX}, fin: ${finX}`);
+
 }
 
 function startAiming(event){
@@ -41,8 +48,8 @@ function startAiming(event){
 	let cy = canvas.height - event.offsetY + 1;
 	let dcx = event.offsetX;
 	let dcy = event.offsetY;
-	console.log(`X: ${dcx}, Y: ${dcy}`);
+	//console.log(`X: ${dcx}, Y: ${dcy}`);
 	drawBall(x, y);
 	drawBall(dcx, dcy);
-	drawAim(dcx, dcy);
+	drawAim(dcx, dcy, 1, cx, cy);
 }
