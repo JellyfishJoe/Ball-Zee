@@ -3,7 +3,9 @@ const ctx = canvas.getContext('2d');
 
 let gameInterval;
 
-let x, y, cx, cy, dcx, dcy, vx, vy;
+let x, y, cx, cy, dcx, dcy, vx, vy, releaseAngle;
+
+let vel = 5;
 
 let gameRun = true;
 
@@ -18,10 +20,10 @@ canvas.addEventListener('mousedown', function(){
 function startGame(){
 	x = canvas.width / 2;
 	y = canvas.height - 15;
-	drawBall(x, y);
+	drawBall(x, y, ballColor, ballRadius);
 	canvas.addEventListener('mousedown', function(){
 		canvas.addEventListener('mousemove', startAiming);
-		canvas.addEventListener('mouseup', shoot);
+		canvas.addEventListener('mouseup', release);
 	});
 	console.log('start');
 }
@@ -48,8 +50,8 @@ function drawAim(finX, finY, numBalls){
 
 function startAiming(event){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	let cx = event.offsetX - canvas.width / 2;
-	let cy = canvas.height - event.offsetY + 1;
+	//let cx = event.offsetX - canvas.width / 2;
+	//let cy = canvas.height - event.offsetY + 1;
 	dcx = event.offsetX;
 	dcy = event.offsetY;
 
@@ -60,32 +62,53 @@ function startAiming(event){
 
 }
 
-function shoot(){
+function release(){
 	if(gameRun){
 		gameInterval = setInterval(gameLoop, 10);
 		gameRun = false;
 	}
 	canvas.removeEventListener('mousemove', startAiming);
-	vx = cx;
-	vy = cy;
-	
+
+	let ydist = y - dcy;
+	let xdist = dcx - x;
+
+	console.log(xdist, ydist);
+
+	releaseAngle = Math.atan((y - dcy)/(dcx - x));
+
+	if(releaseAngle > Math.PI/4){
+		vx = vel * Math.cos(releaseAngle);
+	}else{
+		vx = -vel * Math.cos(releaseAngle);
+	}
+
+	vy = vel * Math.sin(releaseAngle);
+	//console.log(y - dcy, dcx - x);
+	console.log(releaseAngle);
 }
 
 function gameLoop(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawBall(x, y, ballColor, ballRadius);
 
+	//console.log(vx, vy);
+
 	//ball staying in the canvas rules
 	if(x + vx < ballRadius || x + vx > canvas.width - ballRadius){
 		vx = -vx;
+		console.log("vx = " + vx);
 	}
 
 	if(y + vy < ballRadius || y + vy > canvas.height - ballRadius){
 		vy = -vy;
+		console.log("vy = " + vy);
+		//console.log("yes2");
+		//console.log(y + vy)
 	}
 
 	x += vx;
 	y += vy;
-	console.log(x, y);
+	//console.log(vx, vy);
+	//console.log(x, y);
 	//console.log("running");
 }
