@@ -5,6 +5,8 @@ let gameInterval;
 
 let x, y, cx, cy, dcx, dcy, vx, vy, releaseAngle;
 
+let ballz = [];
+
 let vel = 5;
 
 let gameRun = true;
@@ -18,14 +20,32 @@ canvas.addEventListener('mousedown', function(){
 });
 */
 function startGame(){
+	clearInterval(gameInterval);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	x = canvas.width / 2;
-	y = canvas.height - 15;
+	y = canvas.height - 10;
 	drawBall(x, y, ballColor, ballRadius);
-	canvas.addEventListener('mousedown', function(){
-		canvas.addEventListener('mousemove', startAiming);
-		canvas.addEventListener('mouseup', release);
+	ballz.push({x, y, vx, vy});
+	x -= 100;
+	ballz.push({x, y, vx, vy});
+
+	ballz.forEach(function(ball){
+		console.log(ball.x);
 	});
-	console.log('start');
+
+	drawRect();
+	canvas.addEventListener('mousedown', addEventListeners);
+}
+
+function addEventListeners(){
+	canvas.addEventListener('mousemove', startAiming);
+	canvas.addEventListener('mouseup', release);
+}
+
+function removeEventListeners(){
+	canvas.removeEventListener('mousedown', addEventListeners);
+	canvas.removeEventListener('mousemove', startAiming);
+	canvas.removeEventListener('mouseup', release);
 }
 
 function drawBall(x, y, color, ballRadius){
@@ -34,8 +54,13 @@ function drawBall(x, y, color, ballRadius){
 	ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
 	ctx.fill();
 	ctx.closePath();
+}
 
-	//console.log("drawn");
+function drawRect(){
+	ctx.beginPath();
+	ctx.fillStyle = "blue";
+	ctx.fillRect(canvas.width / 4, 0, canvas.width / 2, 10);
+	ctx.closePath();
 }
 
 function drawAim(finX, finY, numBalls){
@@ -50,14 +75,13 @@ function drawAim(finX, finY, numBalls){
 
 function startAiming(event){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	//let cx = event.offsetX - canvas.width / 2;
-	//let cy = canvas.height - event.offsetY + 1;
 	dcx = event.offsetX;
 	dcy = event.offsetY;
 
 	console.log(dcx, dcy);
 
 	drawBall(x, y, ballColor, ballRadius);
+	drawRect();
 	drawAim(dcx, dcy, 3);
 
 }
@@ -67,48 +91,53 @@ function release(){
 		gameInterval = setInterval(gameLoop, 10);
 		gameRun = false;
 	}
-	canvas.removeEventListener('mousemove', startAiming);
+	
+	removeEventListeners();
 
 	let ydist = y - dcy;
 	let xdist = dcx - x;
 
-	console.log(xdist, ydist);
-
 	releaseAngle = Math.atan((y - dcy)/(dcx - x));
 
 	if(releaseAngle > Math.PI/4){
-		vx = vel * Math.cos(releaseAngle);
+		ballz.forEach(function(ball){
+			ball.vx = vel * Math.cos(releaseAngle);
+			ball.vy = -vel * Math.sin(releaseAngle);
+		})
+		//vx = vel * Math.cos(releaseAngle);
+		//vy = -vel * Math.sin(releaseAngle);
 	}else{
 		vx = -vel * Math.cos(releaseAngle);
+		vy = vel * Math.sin(releaseAngle);
 	}
 
-	vy = vel * Math.sin(releaseAngle);
-	//console.log(y - dcy, dcx - x);
-	console.log(releaseAngle);
+	//console.log(releaseAngle);
 }
+
+//function addBall()
 
 function gameLoop(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	drawBall(x, y, ballColor, ballRadius);
+	drawRect();
 
-	//console.log(vx, vy);
-
+	ballz.forEach(function(ball){
+		drawBall(ball.x, ball.y, ballColor, ballRadius);
+		if(ball.x + ball.vx < ballRadius || ball.x + ball.vx > canvas.width - ballRadius){
+			ball.vx = -ball.vx;
+			console.log("vx = " + ball.vx);
+		}
+		if(ball.y + ball.vy < ballRadius){
+			ball.vy = -ball.vy;
+			console.log("vy = " + ball.vy);
+		}else if(ball.y + ball.vy > canvas.height - ballRadius){
+			ball.vx = 0;
+			ball.vy = 0;
+			canvas.addEventListener('mousedown', addEventListeners);
+			clearInterval(gameInterval);
+			gameRun = true;
+		}
+		ball.x += ball.vx;
+		ball.y += ball.vy;
+	})
 	//ball staying in the canvas rules
-	if(x + vx < ballRadius || x + vx > canvas.width - ballRadius){
-		vx = -vx;
-		console.log("vx = " + vx);
-	}
-
-	if(y + vy < ballRadius || y + vy > canvas.height - ballRadius){
-		vy = -vy;
-		console.log("vy = " + vy);
-		//console.log("yes2");
-		//console.log(y + vy)
-	}
-
-	x += vx;
-	y += vy;
-	//console.log(vx, vy);
-	//console.log(x, y);
-	//console.log("running");
 }
