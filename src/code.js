@@ -5,9 +5,9 @@ let gameInterval;
 
 let x, y, cx, cy, dcx, dcy, vx, vy, releaseAngle;
 
-let ballz = [];
-
 let vel = 5;
+
+let ballz = [];
 
 let gameRun = true;
 
@@ -24,15 +24,13 @@ function startGame(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	x = canvas.width / 2;
 	y = canvas.height - 10;
+	ballz = [];
 	drawBall(x, y, ballColor, ballRadius);
 
 	for(let i = 0; i < 10; i++){
 		ballz.push({x, y, vx, vy});
 	}
 
-	ballz.forEach(function(ball){
-		console.log(ball.x);
-	});
 	drawRect(canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
 	canvas.addEventListener('mousedown', addEventListeners);
 }
@@ -72,8 +70,8 @@ function cutCircle(ctx, x, y, radius){
 function drawAim(finX, finY, numBalls){
 	numBalls += 1;
 	for(i = 1; i <= numBalls; i++){
-		ballX = x - (i * (x - finX) / numBalls);
-		ballY = y - (i * (y - finY) / numBalls);
+		ballX = ballz[0].x - (i * (ballz[0].x - finX) / numBalls);
+		ballY = ballz[0].y - (i * (ballz[0].y - finY) / numBalls);
 		drawBall(ballX, ballY, 'red', 5);
 	}
 
@@ -84,9 +82,7 @@ function startAiming(event){
 	dcx = event.offsetX;
 	dcy = event.offsetY;
 
-	console.log(dcx, dcy);
-
-	drawBall(x, y, ballColor, ballRadius);
+	drawBall(ballz[0].x, ballz[0].y, ballColor, ballRadius);
 	drawRect();
 	drawAim(dcx, dcy, 3);
 
@@ -103,14 +99,12 @@ function release(){
 	let ydist = y - dcy;
 	let xdist = dcx - x;
 
-	console.log((y - dcy)/(dcx - x));
+	releaseAngle = Math.atan((ballz[0].y - dcy)/(dcx - ballz[0].x));
 
-	releaseAngle = Math.atan((y - dcy)/(dcx - x));
-
-	if(releaseAngle > Math.PI/2){
+	if(releaseAngle > 0){
 		ballz.forEach(function(ball){
 			ball.vx = vel * Math.cos(releaseAngle);
-			ball.vy = vel * Math.sin(releaseAngle);
+			ball.vy = -vel * Math.sin(releaseAngle);
 		});
 		//vx = vel * Math.cos(releaseAngle);
 		//vy = -vel * Math.sin(releaseAngle);
@@ -124,6 +118,7 @@ function release(){
 	//console.log(releaseAngle);
 }
 
+
 function gameLoop(){
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	drawRect(canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
@@ -132,20 +127,25 @@ function gameLoop(){
 			drawBall(ball.x, ball.y, ballColor, ballRadius);
 			if(ball.x + ball.vx < ballRadius || ball.x + ball.vx > canvas.width - ballRadius){
 				ball.vx = -ball.vx;
-				console.log("vx = " + ball.vx);
+				//console.log("vx = " + ball.vx);
 			}
 			if(ball.y + ball.vy < ballRadius){
 				ball.vy = -ball.vy;
-				console.log("vy = " + ball.vy);
+				//console.log("vy = " + ball.vy);
 			}else if(ball.y + ball.vy > canvas.height - ballRadius){
 				ball.vx = 0;
 				ball.vy = 0;
-				if(ballz.every(vx == 0 && vy == 0)){
+			}
+			var ballsMoving = ballz.every(function(ball){
+				if(ball.vx == 0 && ball.vy == 0){
+					return true
+				}
+			})
+			if(ballsMoving){
 					canvas.addEventListener('mousedown', addEventListeners);
 					clearInterval(gameInterval);
 					gameRun = true;
 				}
-			}
 			ball.x += ball.vx;
 			ball.y += ball.vy;
 		}, ballz.indexOf(ball) * 100);
