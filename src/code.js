@@ -1,5 +1,9 @@
-const canvas = document.getElementById('game');
+const canvas = document.getElementById('gameLayer1');
 const ctx = canvas.getContext('2d');
+
+const canvas2 = document.getElementById('gameLayer2');
+const ctx2 = canvas2.getContext('2d');
+
 
 let gameInterval;
 
@@ -25,13 +29,15 @@ function startGame(){
 	x = canvas.width / 2;
 	y = canvas.height - 10;
 	ballz = [];
-	drawBall(x, y, ballColor, ballRadius);
+	drawBall(ctx, x, y, ballColor, ballRadius);
+	drawBall(ctx2, 50, 50, "red", ballRadius);
+
 
 	for(let i = 0; i < 10; i++){
 		ballz.push({x, y, vx, vy});
 	}
 
-	drawRect(canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
+	drawRect(ctx, canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
 	canvas.addEventListener('mousedown', addEventListeners);
 }
 
@@ -46,19 +52,19 @@ function removeEventListeners(){
 	canvas.removeEventListener('mouseup', release);
 }
 
-function drawBall(x, y, color, ballRadius){
-	ctx.beginPath();
-	ctx.fillStyle = color;
-	ctx.arc(x, y, ballRadius, 0, 2 * Math.PI);
-	ctx.fill();
-	ctx.closePath();
+function drawBall(context, x, y, color, ballRadius){
+	context.beginPath();
+	context.fillStyle = color;
+	context.arc(x, y, ballRadius, 0, 2 * Math.PI);
+	context.fill();
+	context.closePath();
 }
 
-function drawRect(x, y, dx, dy, color){
-	ctx.beginPath();
-	ctx.fillStyle = color;
-	ctx.fillRect(x, y, dx, dy);
-	ctx.closePath();
+function drawRect(context, x, y, dx, dy, color){
+	context.beginPath();
+	context.fillStyle = color;
+	context.fillRect(x, y, dx, dy);
+	context.closePath();
 }
 
 function cutCircle(ctx, x, y, radius){
@@ -72,19 +78,18 @@ function drawAim(finX, finY, numBalls){
 	for(i = 1; i <= numBalls; i++){
 		ballX = ballz[0].x - (i * (ballz[0].x - finX) / numBalls);
 		ballY = ballz[0].y - (i * (ballz[0].y - finY) / numBalls);
-		drawBall(ballX, ballY, 'red', 5);
+		drawBall(ctx, ballX, ballY, 'red', 5);
 	}
-
 }
 
 function startAiming(event){
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx2.clearRect(0, 0, canvas.width, canvas.height);
 	dcx = event.offsetX;
 	dcy = event.offsetY;
 
-	drawBall(ballz[0].x, ballz[0].y, ballColor, ballRadius);
-	drawRect();
-	drawAim(dcx, dcy, 3);
+	drawBall(ctx2, ballz[0].x, ballz[0].y, ballColor, ballRadius);
+	//drawRect();
+	drawAim(dcx, dcy, 4);
 
 }
 
@@ -120,11 +125,11 @@ function release(){
 
 
 function gameLoop(){
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	drawRect(canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
+	ctx2.clearRect(0, 0, canvas.width, canvas.height);
+	drawRect(ctx, canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
 	ballz.forEach(function(ball){
 		setTimeout(function(){
-			drawBall(ball.x, ball.y, ballColor, ballRadius);
+			drawBall(ctx, ball.x, ball.y, ballColor, ballRadius);
 			if(ball.x + ball.vx < ballRadius || ball.x + ball.vx > canvas.width - ballRadius){
 				ball.vx = -ball.vx;
 				//console.log("vx = " + ball.vx);
