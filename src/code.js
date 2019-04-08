@@ -26,30 +26,32 @@ canvas.addEventListener('mousedown', function(){
 function startGame(){
 	clearInterval(gameInterval);
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
 	x = canvas.width / 2;
 	y = canvas.height - 10;
 	ballz = [];
-	drawBall(ctx, x, y, ballColor, ballRadius);
+	drawBall(ctx2, x, y, ballColor, ballRadius);
 	drawBall(ctx2, 50, 50, "red", ballRadius);
 
 
-	for(let i = 0; i < 10; i++){
+	for(let i = 0; i < 1; i++){
 		ballz.push({x, y, vx, vy});
 	}
 
 	drawRect(ctx, canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
-	canvas.addEventListener('mousedown', addEventListeners);
+	canvas2.addEventListener('mousedown', addEventListeners);
 }
 
 function addEventListeners(){
-	canvas.addEventListener('mousemove', startAiming);
-	canvas.addEventListener('mouseup', release);
+	canvas2.addEventListener('mousemove', startAiming);
+	canvas2.addEventListener('mouseup', release);
+	console.log("owo");
 }
 
 function removeEventListeners(){
-	canvas.removeEventListener('mousedown', addEventListeners);
-	canvas.removeEventListener('mousemove', startAiming);
-	canvas.removeEventListener('mouseup', release);
+	canvas2.removeEventListener('mousedown', addEventListeners);
+	canvas2.removeEventListener('mousemove', startAiming);
+	canvas2.removeEventListener('mouseup', release);
 }
 
 function drawBall(context, x, y, color, ballRadius){
@@ -78,7 +80,7 @@ function drawAim(finX, finY, numBalls){
 	for(i = 1; i <= numBalls; i++){
 		ballX = ballz[0].x - (i * (ballz[0].x - finX) / numBalls);
 		ballY = ballz[0].y - (i * (ballz[0].y - finY) / numBalls);
-		drawBall(ctx, ballX, ballY, 'red', 5);
+		drawBall(ctx2, ballX, ballY, 'red', 5);
 	}
 }
 
@@ -123,13 +125,12 @@ function release(){
 	//console.log(releaseAngle);
 }
 
-
 function gameLoop(){
 	ctx2.clearRect(0, 0, canvas.width, canvas.height);
 	drawRect(ctx, canvas.width / 4, 0, canvas.width / 2, 10, 'blue');
 	ballz.forEach(function(ball){
 		setTimeout(function(){
-			drawBall(ctx, ball.x, ball.y, ballColor, ballRadius);
+			drawBall(ctx2, ball.x, ball.y, ballColor, ballRadius);
 			if(ball.x + ball.vx < ballRadius || ball.x + ball.vx > canvas.width - ballRadius){
 				ball.vx = -ball.vx;
 				//console.log("vx = " + ball.vx);
